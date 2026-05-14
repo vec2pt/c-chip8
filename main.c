@@ -37,7 +37,7 @@ const keymap_t keymap[] = {
 };
 
 bool sdl_init(sdl_t *sdl) {
-  const uint8_t scale = 20;
+  const uint8_t scale = 12;
 
   if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO)) {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error initializing SDL3: %s\n",
@@ -201,18 +201,11 @@ int main(int argc, char *argv[]) {
   // Renderer loop
   while (chip8.running) {
     sdl_handle_event(&sdl, &chip8);
-
-    // TODO: Probably not the best solution.
-    bool redraw = false;
-
     const uint64_t start_frame_time = SDL_GetPerformanceCounter();
 
     // 600 Instructions per second
-    for (uint32_t i = 0; i < 10; i++) {
+    for (uint32_t i = 0; i < 10; i++)
       chip8_step(&chip8);
-      if (chip8.draw_flag)
-        redraw = true;
-    }
 
     const uint64_t end_frame_time = SDL_GetPerformanceCounter();
     const double time_elapsed =
@@ -221,8 +214,7 @@ int main(int argc, char *argv[]) {
 
     SDL_Delay(16.67f > time_elapsed ? 16.67f - time_elapsed : 0);
 
-    if (redraw)
-      sdl_draw(&sdl, chip8);
+    sdl_draw(&sdl, chip8);
     if (chip8.sound_timer > 0 && SDL_AudioStreamDevicePaused(sdl.stream))
       SDL_ResumeAudioStreamDevice(sdl.stream);
     else if (chip8.sound_timer == 0 && !SDL_AudioStreamDevicePaused(sdl.stream))
